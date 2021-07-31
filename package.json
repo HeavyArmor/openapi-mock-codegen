@@ -1,8 +1,8 @@
 {
-  "name": "openapi-mock-server",
-  "version": "0.0.1",
-  "description": "openapi or swagger mock server",
-  "main": "main.js",
+  "name": "openapi-mock-codegen",
+  "version": "1.0.1",
+  "description": "openapi or swagger mock server codegen",
+  "main": "dist/server/index.js",
   "scripts": {
     "test": "jest"
   },
