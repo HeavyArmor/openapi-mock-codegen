@@ -1,0 +1,14 @@
+{
+    "internet.email": ["email"],
+    "internet.userName": ["userName", "user","user.name", "user name"],
+    "internet.ip": ["ip", "ipV4", "ip.v4", "ip v4"],
+    "internet.ipv6": ["ipV6", "ip.v6", "ip v6"],
+    "internet.password": ["password", "passwd"],
+    "name.firstName": ["firstName", "first name"],
+    "name.lastName": ["lastName", "last name"],
+    "name.findName": ["findName", "find name", "fullName", "full name"],
+    "image.imageUrl": ["photoUrl", "photo url", "photoUrls", "phpto urls", "photo.url", "photo.urls", "imageUrl", "imageUrl", "imgUrl", "imgUrls", "image.url", "image.urls", "img.url", "img.urls", "image url", "image urls", "img url", "img urls", "picture", "pictureUrl", "pictureUrls"],
+    "finance.account": ["account"],
+    "finance.accountName": ["accountName", "account.name", "account name"],
+    "phone.phoneNumber": ["phone", "phoneNumber", "phone number", "phoneNumbers", "phone numbers", "phoneNum", "phone num", "phoneNums", "call", "callNumber", "call number", "callNumbers", "call numbers", "callNum", "call num", "callNums", "call nums"]
+}

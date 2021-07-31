@@ -1,0 +1,7 @@
+{
+    "port": 3020,
+    "allowed_file_ext": [".js"],
+    "randomResp": true,
+    "useDict": true,
+    "locale": "en_US"
+}

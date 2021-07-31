@@ -1,0 +1,27 @@
+{
+    "compileOnSave": true,
+    "compilerOptions": {
+        "allowJs": false,
+        "allowUnusedLabels": true,
+        "allowSyntheticDefaultImports": true,
+        "baseUrl": ".",
+        "charset": "utf-8",
+        "declaration": false,
+        "downlevelIteration": true,
+        "experimentalDecorators": true,
+        "esModuleInterop": true,
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "noUnusedLocals": false,
+        "outDir": "./dist",
+        "paths": {
+            "@codegen": ["packages/codegen"]
+        },
+        "resolveJsonModule": true, 
+        "strict": true,
+        "types": ["node", "jest"],
+        "target": "es2015"
+    },
+    "exclude": ["node_modules", "dist"],
+    "include": ["packages/**/*.ts", "packages/**/*.json"],
+}
