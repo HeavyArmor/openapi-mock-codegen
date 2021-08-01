@@ -41,13 +41,22 @@ function generateDefinitions(codePath: string, definitions?: Definitions): void 
     }
 }
 
+function generateDirs(dirname: string) {
+    if (fs.existsSync(dirname)) {
+      return true;
+    } else {
+      if (generateDirs(path.dirname(dirname))) {
+        fs.mkdirSync(dirname);
+        return true;
+      }
+    }
+}
+
 export function generate(absolutePath: string, codePath: string): void {
     const filePaths: Array<string> = 
         fs.statSync(absolutePath).isFile() ? 
             [absolutePath] : fs.readdirSync(absolutePath, ENCODING_UTF_8);
-    if(!fs.existsSync(codePath)) {
-        fs.mkdirSync(codePath);
-    }   
+    if(!generateDirs(codePath)) return;
     filePaths.forEach(fileName => {           
         generateDefinitionsFile(absolutePath, fileName, codePath);
     });
