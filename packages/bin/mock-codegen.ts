@@ -14,9 +14,10 @@ program
         const codeDir = dir.codeDir;
         if(path.isAbsolute(templateDir)) {
             if(!fs.existsSync(templateDir)) {
-                throw new Error(`The value of dir ${templateDir} is not exists`);
+                console.error(`The value of dir ${templateDir} is not exists`);
+                process.exit(1);
             }
-            generate(templateDir, codeDir);
+            generate(templateDir, path.resolve(codeDir, "routes"));
         }
     })
     .parse(process.argv);

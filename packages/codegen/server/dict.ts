@@ -1,5 +1,4 @@
 import fs from "fs";
-import { ENCODING_UTF_8 } from "../utils/util";
 import path from "path";
 
 declare type Dict = {
@@ -10,7 +9,7 @@ export class FakerDictionary {
     dict: Dict;
     constructor() {
         const defaultDictPath: string = path.resolve(__dirname, "dictionary.json");
-        this.dict = JSON.parse(fs.existsSync(defaultDictPath) ? fs.readFileSync(defaultDictPath, ENCODING_UTF_8) : "{}");
+        this.dict = JSON.parse(fs.existsSync(defaultDictPath) ? fs.readFileSync(defaultDictPath, "utf-8") : "{}");
     }
 
     setDictionary(dict: Dict): void {

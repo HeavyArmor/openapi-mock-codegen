@@ -1,0 +1,36 @@
+{
+  "name": "openapi-mock-server",
+  "version": "0.1.0",
+  "description": "openapi mock server",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HeavyArmor/openapi-mock-codegen.git"
+  },
+  "bugs": "https://github.com/HeavyArmor/openapi-mock-codegen/issues",
+  "dependencies": {
+    "lodash": "^4.17.21",
+    "koa": "^2.13.1",
+    "koa-basic-auth": "^4.0.0",
+    "koa-body": "^4.2.0",
+    "koa-router": "^10.0.0",
+    "json-schema-faker": "^0.5.0-rcv.17",
+    "mime-type": "^4.0.0",
+    "mime-db": "^1.48.0",
+    "faker": "^5.5.0",
+    "commander": "^8.0.0"
+  },
+  "keywords": [
+    "mock",
+    "server",
+    "typescript"
+  ],
+  "author": "qingcheng_ln@126.com",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.16.0"
+  }
+}

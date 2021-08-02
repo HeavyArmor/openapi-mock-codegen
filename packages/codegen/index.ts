@@ -6,11 +6,10 @@ import { ENCODING_UTF_8, isV2, newLine, OasDefinitions, OasPaths, repeatWhitespa
 import { Swagger, Definitions } from "../specification/v2";
 import { parsePaths } from "../parser";
 import { generateRoutesString } from "./oas2/routes";
-import write2file from "../filesys/write2file";
+import write2file from "../utils/write2file";
 
 const JS_FILE_SUFIX: string = ".js";
 const JSON_FILE_SUFIX: string = ".json";
-const UTIL_FILE_NAME: string = "util";
 const DEFI_FILE: string = "definitions";
 
 function generateDefinitionsFile(absolutePath: string, fileName: string, codePath: string): void {
@@ -41,6 +40,20 @@ function generateDefinitions(codePath: string, definitions?: Definitions): void 
     }
 }
 
+function copyServerFiles(absolutePath: string) {
+    const serverFilesAbsolutePath = path.resolve(__dirname, "server");
+    const dirStat = fs.statSync(serverFilesAbsolutePath);
+    if(dirStat.isDirectory()) {
+        fs.readdirSync(serverFilesAbsolutePath).forEach(file => {
+            const filePath = path.resolve(serverFilesAbsolutePath, file);
+            const stat = fs.statSync(filePath);
+            if(stat.isFile()) {
+                fs.copyFileSync(filePath, path.resolve(absolutePath, "../", file), fs.constants.COPYFILE_FICLONE);
+            }
+        });
+    }
+}
+
 function generateDirs(dirname: string) {
     if (fs.existsSync(dirname)) {
       return true;
@@ -57,6 +70,7 @@ export function generate(absolutePath: string, codePath: string): void {
         fs.statSync(absolutePath).isFile() ? 
             [absolutePath] : fs.readdirSync(absolutePath, ENCODING_UTF_8);
     if(!generateDirs(codePath)) return;
+    copyServerFiles(codePath);
     filePaths.forEach(fileName => {           
         generateDefinitionsFile(absolutePath, fileName, codePath);
     });

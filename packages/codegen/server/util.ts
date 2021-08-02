@@ -1,5 +1,5 @@
 import { isString, isNumber, isInteger, isBoolean, isArray, isEmpty } from "lodash";
-import { ResponsesDefinitions, Response, Definitions } from "../specification/v2";
+import { ResponsesDefinitions, Response, Definitions } from "../../specification/v2";
 import fs from "fs";
 import path from "path";
 import { JSONSchema4 } from "json-schema";
@@ -23,7 +23,8 @@ export function config() {
 
 export function checkParameter(consumes: Array<string>, paramName: string, paramValue: any, type: string, parameterIn: string, required: boolean) {
     if(required && isEmpty(paramValue)) {
-        throw new Error(`Parameter ${paramName} is required!`)
+        console.warn(`Parameter ${paramName} is required!`);
+        process.exit(1);
     }
     let valid = true
     let validMsg
@@ -56,7 +57,8 @@ export function checkParameter(consumes: Array<string>, paramName: string, param
         validMsg = `Parameter ${paramName} type check faild, the type shoud be array`;
     }
     if (!valid) {
-        throw new Error(validMsg);
+        console.warn(validMsg);
+        process.exit(1);
     }
 }
 export function randomResponse(responses: ResponsesDefinitions, random?: boolean) {
