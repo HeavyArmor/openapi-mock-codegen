@@ -8,7 +8,7 @@ import { generate } from "../codegen/index";
 program
     .name("mock-codegen")
     .option("-td, --templateDir <dir>", "template files dir", path.resolve(process.cwd(), "templates"))
-    .option("-cd, --codeDir <dir>", "the path code generate to", path.resolve(process.cwd(), "server", "routes"))
+    .option("-cd, --codeDir <dir>", "the path code generate to", path.resolve(process.cwd(), "server"))
     .action((dir, cmd) => {
         const templateDir = dir.templateDir;
         const codeDir = dir.codeDir;
