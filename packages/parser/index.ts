@@ -1,5 +1,5 @@
 import { Tag } from "../specification/base"
-import { Definitions, Swagger } from "../specification/v2";
+import { Definitions, PathItem, Swagger } from "../specification/v2";
 import { OasDefinitions, OasPaths} from "../utils/util";
 import { isArray, isEmpty, isObject, isUndefined } from "lodash";
 import { JSONSchema4 } from "json-schema";
@@ -19,9 +19,18 @@ export function parsePaths(targetDocument: OasDefinitions): Map<string, OasPaths
                 docModules.forEach(item => {
                     const docModulesObj: OasPaths = {};
                     Object.keys(docPaths).forEach((key) => {
-                    if(key.startsWith("/" + item)) {
-                        docModulesObj[key.replace(/\/{\s?/g, "/:").replace(/\s?}/g,"")] = docPaths[key];
-                    }
+                        const pathItems: Array<PathItem> = Object.values(docPaths[key]);
+                        if(pathItems.length) {
+                            const itemTags = pathItems[0].tags;
+                            if(itemTags && isArray(itemTags) && itemTags.length) {
+                                if(itemTags.includes(item)) {
+                                    docModulesObj[key.replace(/\/{\s?/g, "/:").replace(/\s?}/g,"")] = docPaths[key];
+                                }
+                            }
+                        }
+                        else if(key.toLowerCase().includes(("/" + item).toLowerCase())) {
+                            docModulesObj[key.replace(/\/{\s?/g, "/:").replace(/\s?}/g,"")] = docPaths[key];
+                        }
                     });
                     docModulesList.set(item, docModulesObj);
                 });
