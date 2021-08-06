@@ -2,10 +2,11 @@ import path from "path";
 import fs from "fs";
 import { isPlainObject, isEmpty } from "lodash";
 import yaml from "js-yaml";
-import { ENCODING_UTF_8, isV2, newLine, OasDefinitions, OasPaths, repeatWhitespace } from "../utils/util";
+import { ENCODING_UTF_8, isV2, isV3, OasDefinitions, OasPaths, OasVersion } from "../utils/util";
 import { Swagger, Definitions } from "../specification/v2";
+import { OpenAPI, ComponentChemas } from "packages/specification/v3";
 import { parsePaths } from "../parser";
-import { generateRoutesString } from "./oas2/routes";
+import { generateRoutesString } from "./routes";
 import write2file from "../utils/write2file";
 
 const JS_FILE_SUFIX: string = ".js";
@@ -21,20 +22,22 @@ function generateDefinitionsFile(absolutePath: string, fileName: string, codePat
     if(!isEmpty(fileContent)) {
         const openApi: OasDefinitions =  JSON.parse(fileContent);
         if(isPlainObject(openApi)) {
-            if(isV2(openApi)) {
-                const swagger: Swagger = openApi;
-                generateDefinitions(codePath, swagger.definitions);
-                let swaggerPaths: Map<string, OasPaths> =  parsePaths(swagger);
-                for(let pathKey of swaggerPaths.keys()) {
-                    const result = generateRoutesString(swaggerPaths.get(pathKey) as OasPaths);
-                    write2file(path.resolve(codePath, pathKey + JS_FILE_SUFIX), result);
-                }
+            const version: OasVersion = isV2(openApi) ? OasVersion.V2 : OasVersion.V3;
+            if(version === OasVersion.V2) {
+                generateDefinitions(codePath, (openApi as Swagger).definitions);
+            } else if(version === OasVersion.V3) {
+                generateDefinitions(codePath, (openApi as OpenAPI).components?.schemas);
+            }
+            let oasPaths: Map<string, OasPaths> =  parsePaths(openApi);
+            for(let pathKey of oasPaths.keys()) {
+                const result = generateRoutesString(version, oasPaths.get(pathKey) as OasPaths);
+                write2file(path.resolve(codePath, pathKey + JS_FILE_SUFIX), result);
             }
         }
     }
 }
 
-function generateDefinitions(codePath: string, definitions?: Definitions): void {
+function generateDefinitions(codePath: string, definitions?: Definitions | ComponentChemas): void {
     if(definitions) {
         write2file(path.resolve(codePath, "../", DEFI_FILE + JSON_FILE_SUFIX), JSON.stringify({definitions}));
     }

@@ -1,5 +1,5 @@
-import { newLine } from "../../utils/util";
-import { ExternalDocument } from "../../specification/base";
+import { newLine } from "../utils/util";
+import { ExternalDocument } from "../specification/base";
 
 /**
  * Generate annotation text

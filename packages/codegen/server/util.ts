@@ -1,5 +1,6 @@
 import { isString, isNumber, isInteger, isBoolean, isArray, isEmpty } from "lodash";
 import { ResponsesDefinitions, Response, Definitions } from "../../specification/v2";
+import { ComponentMediaTypes } from "../../specification/v3";
 import fs from "fs";
 import path from "path";
 import { JSONSchema4 } from "json-schema";
@@ -71,6 +72,13 @@ export function randomResponse(responses: ResponsesDefinitions, random?: boolean
         const randomResKey: string = keys[Math.floor(Math.random() * keyLength)];
         return {status: randomResKey === 'default'? 200 : parseInt(randomResKey), value: responses[randomResKey]};
     }
+}
+
+export function randomMedia(mediaType: ComponentMediaTypes) {
+    const keys: Array<string> = Object.keys(mediaType);
+    const keyLength: number = keys.length;
+    const randomResKey: string = keys[Math.floor(Math.random() * keyLength)];
+    return { produces: [randomResKey], value: mediaType[randomResKey]};
 }
 
 export function arrangeDefinitions(definitions: Definitions) {

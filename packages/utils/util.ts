@@ -10,6 +10,11 @@ export declare type OasOperation = V2Operation | V3Operation;
 export declare type OasParameter = V2Parameter | V3Parameter;
 export const ENCODING_UTF_8 = "utf-8";
 
+export enum OasVersion {
+    V2 = "swagger",
+    V3 = "openapi"
+}
+
 export function repeatWhitespace(count: number) {
     return '  '.repeat(count);
 }

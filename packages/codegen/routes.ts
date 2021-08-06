@@ -1,6 +1,7 @@
-import { Reference } from "../../specification/base";
-import { Parameter, Operation, ResponsesDefinitions, Response, Definitions, PathItem } from "../../specification/v2";
-import { HTTP_METHOD, isParameter, newLine, OasPaths, repeatWhitespace } from "../../utils/util";
+import { Responses } from "packages/specification/v3";
+import { Reference } from "../specification/base";
+import { Parameter, Operation, ResponsesDefinitions, PathItem } from "../specification/v2";
+import { HTTP_METHOD, isParameter, newLine, OasPaths, OasVersion, repeatWhitespace } from "../utils/util";
 import { generateAnnotation } from "./annotation";
 const Mime = require('mime-type/with-db');
 function generateConsumes(consumes: Array<string> | undefined, repeatCount = 0): string {
@@ -51,36 +52,55 @@ function generateParameters(params: Array<Parameter | Reference> | undefined, re
     return "";
 }
 
-function generateResponse(responses: ResponsesDefinitions | undefined, repeatCount = 0): string {
-        const result: Array<string> = []; 
-        const whiteSpaceRepeat0 = repeatWhitespace(repeatCount);
-        const whiteSpaceRepeat1 = repeatWhitespace(repeatCount + 1);
-        result.push(`${whiteSpaceRepeat0}if(validProduces.length) {`);
-        result.push(`${whiteSpaceRepeat1}ctx.response.header['Content-Type'] = validProduces.join(',');`);
-        result.push(`${whiteSpaceRepeat0}}`);
-        if(responses) {
-            result.push(`${whiteSpaceRepeat0}const res = randomResponse(${JSON.stringify(responses)}, FINAL_CONFIG.randomResp);`);
-            result.push(`${whiteSpaceRepeat0}const schema = Object.assign({}, {schema: res.value.schema}, definitions);`);
-            result.push(`${whiteSpaceRepeat0}ctx.response.status = res.status;`);
-            result.push(`${whiteSpaceRepeat0}ctx.response.headers = res.value.headers;`)
-            result.push(`${whiteSpaceRepeat0}ctx.response.body = res.value.schema ? jsf.generate(schema).schema : res.value.description;`);
-        }
-        return result.join(newLine(0));
-}
-
-export function computeRoutes(op: Operation) {
-    const result: Array<string> = [];
-    result.push(generateConsumes(op.consumes, 1));
-    result.push(generateProduces(op.produces, 1));
-    result.push(generateParameters(op.parameters, 1));
-    result.push(generateResponse(op.responses, 1));
+function generateV2Response(responses: ResponsesDefinitions | undefined, repeatCount = 0): string {
+    const result: Array<string> = []; 
+    const whiteSpaceRepeat0 = repeatWhitespace(repeatCount);
+    const whiteSpaceRepeat1 = repeatWhitespace(repeatCount + 1);
+    result.push(`${whiteSpaceRepeat0}if(validProduces.length) {`);
+    result.push(`${whiteSpaceRepeat1}ctx.response.header['Content-Type'] = validProduces.join(',');`);
+    result.push(`${whiteSpaceRepeat0}}`);
+    if(responses) {
+        result.push(`${whiteSpaceRepeat0}const res = randomResponse(${JSON.stringify(responses)}, FINAL_CONFIG.randomResp);`);
+        result.push(`${whiteSpaceRepeat0}const schema = Object.assign({}, {schema: res.value.schema}, definitions);`);
+        result.push(`${whiteSpaceRepeat0}ctx.response.status = res.status;`);
+        result.push(`${whiteSpaceRepeat0}ctx.response.headers = res.value.headers;`);
+        result.push(`${whiteSpaceRepeat0}ctx.response.body = res.value.schema ? jsf.generate(schema).schema : res.value.description;`);
+    }
     return result.join(newLine(0));
 }
 
-export function generateRoutesString(paths: OasPaths): string {
+function generateV3Response(responses: Responses | undefined, repeatCount = 0): string {
+    const result: Array<string> = []; 
+    const whiteSpaceRepeat0 = repeatWhitespace(repeatCount);
+    if(responses) {
+        result.push(`${whiteSpaceRepeat0}const res = randomResponse(${JSON.stringify(responses)}, FINAL_CONFIG.randomResp);`);
+        result.push(`${whiteSpaceRepeat0}const media = randomMedia(res.value.content);`);
+        result.push(`${whiteSpaceRepeat0}const schema = Object.assign({}, {schema: media.value.schema}, definitions);`);
+        result.push(`${whiteSpaceRepeat0}ctx.response.header['Content-Type'] = media.produces;`);
+        result.push(`${whiteSpaceRepeat0}ctx.response.status = res.status;`);
+        result.push(`${whiteSpaceRepeat0}ctx.response.headers = res.value.headers;`);
+    }
+    return result.join(newLine(0));
+}
+
+export function computeRoutes(version: OasVersion, op: Operation) {
+    const result: Array<string> = [];
+    if(version === OasVersion.V2) {
+        result.push(generateConsumes(op.consumes, 1));
+        result.push(generateProduces(op.produces, 1));
+        result.push(generateParameters(op.parameters, 1));
+        result.push(generateV2Response(op.responses, 1));
+    } else if(version === OasVersion.V3) {
+        result.push(generateParameters(op.parameters, 1));
+        result.push(generateV3Response(op.responses, 1));
+    }
+    return result.join(newLine(0));
+}
+
+export function generateRoutesString(version: OasVersion, paths: OasPaths): string {
     const targetStr: Array<string> = [];
     targetStr.push(`const Router = require('koa-router');`);
-    targetStr.push(`const { config, checkParameter, randomResponse, arrangeDefinitions } = require('../util');`);
+    targetStr.push(`const { config, checkParameter, randomResponse, ${ version === OasVersion.V2 ? "" : "randomMedia,"} arrangeDefinitions } = require('../util');`);
     targetStr.push(`const router = new Router();`);
     targetStr.push(`const jsf = require('json-schema-faker');`);
     targetStr.push(`const definitions = require("../definitions.json");`);
@@ -99,7 +119,7 @@ export function generateRoutesString(paths: OasPaths): string {
                 const reqMethod: Operation = path[itemKey];
                 targetStr.push(generateAnnotation(reqMethod.summary, reqMethod.description, reqMethod.externalDocs));
                 targetStr.push(`router.${itemKey}("${key}", (ctx) =>{`);
-                targetStr.push(computeRoutes(reqMethod));
+                targetStr.push(computeRoutes(version, reqMethod));
                 targetStr.push(`});`);
             }
         }
