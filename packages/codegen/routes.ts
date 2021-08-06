@@ -1,7 +1,8 @@
-import { Responses } from "packages/specification/v3";
+import { Schema } from "js-yaml";
+import { Parameter as V3Parameter, Operation as V3Operation, RequestBody, Responses } from "../specification/v3";
 import { Reference } from "../specification/base";
-import { Parameter, Operation, ResponsesDefinitions, PathItem } from "../specification/v2";
-import { HTTP_METHOD, isParameter, newLine, OasPaths, OasVersion, repeatWhitespace } from "../utils/util";
+import { Parameter as V2Parameter, Operation as V2Operation, ResponsesDefinitions, PathItem } from "../specification/v2";
+import { HTTP_METHOD, isParameter, isRequestBody, newLine, OasOperation, OasPaths, OasVersion, repeatWhitespace } from "../utils/util";
 import { generateAnnotation } from "./annotation";
 const Mime = require('mime-type/with-db');
 function generateConsumes(consumes: Array<string> | undefined, repeatCount = 0): string {
@@ -24,7 +25,7 @@ function generateProduces(produces: Array<string> | undefined, repeatCount = 0):
     return `${repeatWhitespace(repeatCount)}let validProduces = ${JSON.stringify(computedProduces.length ? computedProduces: [])};`;
 }
 
-function generateParameters(params: Array<Parameter | Reference> | undefined, repeatCount = 0): string {
+function generateV2Parameters(params: Array<V2Parameter | Reference> | undefined, repeatCount = 0): string {
     if(params && Array.isArray(params) && params.length) {
         const result: Array<string> = []; 
         for(let param of params) {
@@ -46,6 +47,37 @@ function generateParameters(params: Array<Parameter | Reference> | undefined, re
                 }
                 result.push(`${repeatWhitespace(repeatCount)}checkParameter(validConsumes, "${param.name}", ${param.name}, "${param.type}", "${param.in}", ${param.required});`);
             }
+        }
+        return result.join(newLine(0));
+    }
+    return "";
+}
+
+function generateV3Parameters(params: Array<V3Parameter | Reference> | undefined, repeatCount = 0): string {
+    if(params && Array.isArray(params) && params.length) {
+        const result: Array<string> = []; 
+        for(let param of params) {
+            if(isParameter(param)) {
+                if(param.in === "path") {
+                    result.push(`${repeatWhitespace(repeatCount)}const ${param.name} = ctx.params.${param.name};`);
+                } else if(param.in === "query") {
+                    result.push(`${repeatWhitespace(repeatCount)}const ${param.name} = ctx.query.${param.name};`);
+                } else if(param.in === "header") {
+                    result.push(`${repeatWhitespace(repeatCount)}const ${param.name} = ctx.headers.${param.name};`);
+                }
+                result.push(`${repeatWhitespace(repeatCount)}checkParameter(null, "${param.name}", ${param.name}, "${param.schema?.type}", "${param.in}", ${param.required});`);
+            }
+        }
+        return result.join(newLine(0));
+    }
+    return "";
+}
+
+function generateV3RequestBody(reqBody: RequestBody | Reference | undefined, repeatCount = 0): string {
+    if(reqBody) {
+        const result: Array<string> = [];    
+        if(isRequestBody(reqBody)) {
+            
         }
         return result.join(newLine(0));
     }
@@ -83,16 +115,19 @@ function generateV3Response(responses: Responses | undefined, repeatCount = 0): 
     return result.join(newLine(0));
 }
 
-export function computeRoutes(version: OasVersion, op: Operation) {
+export function computeRoutes(version: OasVersion, op: OasOperation) {
     const result: Array<string> = [];
     if(version === OasVersion.V2) {
-        result.push(generateConsumes(op.consumes, 1));
-        result.push(generateProduces(op.produces, 1));
-        result.push(generateParameters(op.parameters, 1));
-        result.push(generateV2Response(op.responses, 1));
+        const operation = op as V2Operation;
+        result.push(generateConsumes(operation.consumes, 1));
+        result.push(generateProduces(operation.produces, 1));
+        result.push(generateV2Parameters(operation.parameters, 1));
+        result.push(generateV2Response(operation.responses, 1));
     } else if(version === OasVersion.V3) {
-        result.push(generateParameters(op.parameters, 1));
-        result.push(generateV3Response(op.responses, 1));
+        const operation = op as V3Operation;
+        result.push(generateV3Parameters(operation.parameters, 1));
+        result.push(generateV3RequestBody(operation.requestBody, 1));
+        result.push(generateV3Response(operation.responses, 1));
     }
     return result.join(newLine(0));
 }
@@ -116,7 +151,7 @@ export function generateRoutesString(version: OasVersion, paths: OasPaths): stri
         const path: PathItem = paths[key];
         for(let itemKey in path) {
             if(HTTP_METHOD.indexOf(itemKey.toUpperCase()) > -1) {
-                const reqMethod: Operation = path[itemKey];
+                const reqMethod: OasOperation = path[itemKey];
                 targetStr.push(generateAnnotation(reqMethod.summary, reqMethod.description, reqMethod.externalDocs));
                 targetStr.push(`router.${itemKey}("${key}", (ctx) =>{`);
                 targetStr.push(computeRoutes(version, reqMethod));

@@ -1,6 +1,6 @@
 import { Reference } from "../specification/base";
 import { Swagger, Paths as V2Paths, Operation as V2Operation, Parameter as V2Parameter } from "../specification/v2";
-import { OpenAPI, Paths as V3Paths, Operation as V3Operation, Parameter as V3Parameter } from "../specification/v3";
+import { OpenAPI, Paths as V3Paths, Operation as V3Operation, Parameter as V3Parameter, RequestBody } from "../specification/v3";
 
 export const HTTP_METHOD = ["CONNECT", "DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT", "TRACE"];
 
@@ -32,9 +32,13 @@ export function isV3(target: OasDefinitions): target is OpenAPI {
 }
 
 export function isParameter(target: any): target is OasParameter {
-    return typeof target['in'] !== 'undefined' && typeof target['$ref'] === 'undefined'
+    return typeof target['in'] !== 'undefined' && typeof target['$ref'] === 'undefined';
+}
+
+export function isRequestBody(target: any): target is RequestBody {
+    return typeof target['in'] == 'undefined' && typeof target['$ref'] === 'undefined' && typeof target['content'] !== 'undefined';
 }
 
 export function isReference(target: any): target is Reference { 
-    return typeof target['in'] === 'undefined' && typeof target['$ref'] !== 'undefined'
+    return typeof target['in'] === 'undefined' && typeof target['$ref'] !== 'undefined';
 }
