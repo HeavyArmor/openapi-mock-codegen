@@ -1,8 +1,7 @@
 ## OpenAPI-Mock-Server-Codegen
 An OpenAPI mock server code generation tool.With this tool, you can directly generate a server supported by the koa (currently supported) framework through swagger.json/swagger.yaml
-
 ### Install
-```javascript
+```
 npm install -g openapi-mock-server-codegen
 ```
 ### Getting started
@@ -12,6 +11,21 @@ mock codegen -td D:\templates -cd D:\server
 ```
 ##### Command Parameters  
 | parameter name | info |
-| :---: | :---: |
-| <font color=red size=2>-td</font> | <font size=2>Template files dir</font> |
-| <font color=red size=2>-cd</font> | <font size=2>The path code generate to</font> |
+| :---: | :--- |
+| -td, --templateDir | Template files dir. You can place multiple swagger files in this directory |
+| -cd, --codeDir | The server code generation directory |
+
+### Server usage  
+#### Start server
+Execute the following command in the root directory of the generated code
+```javascript
+node index.js
+```
+#### Server config
+config.json file in the code root directory
+| item | info |
+| :---: | :--- |
+| port | Port number used by koa, default: 3020 |
+| randomResp | Whether to randomly generate the response defined in the `response` field,  default: true |
+| useDict | Whether to use a dictionary to tell the faker framework what kind of data this field needs to generate, default: true |
+| locale | The localized language currently used by faker, default: "en_US" |
