@@ -14,6 +14,7 @@ mock codegen -td D:\templates -cd D:\server
 | :---: | :--- |
 | -td, --templateDir | Template files dir. You can place multiple swagger files in this directory |
 | -cd, --codeDir | The server code generation directory |
+| --api | the path of OpenAPI definition file |
 
 ### Server usage  
 #### Start server
