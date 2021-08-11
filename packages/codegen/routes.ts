@@ -104,11 +104,17 @@ function generateV2Response(responses: ResponsesDefinitions | undefined, repeatC
 function generateV3Response(responses: Responses | undefined, repeatCount = 0): string {
     const result: Array<string> = []; 
     const whiteSpaceRepeat0 = repeatWhitespace(repeatCount);
+    const whiteSpaceRepeat1 = repeatWhitespace(repeatCount + 1);
     if(responses) {
         result.push(`${whiteSpaceRepeat0}const res = randomResponse(${JSON.stringify(responses)}, FINAL_CONFIG.randomResp);`);
-        result.push(`${whiteSpaceRepeat0}const media = randomMedia(res.value.content);`);
-        result.push(`${whiteSpaceRepeat0}const schema = Object.assign({}, {schema: media.value.schema}, definitions);`);
-        result.push(`${whiteSpaceRepeat0}ctx.response.header['Content-Type'] = media.produces;`);
+        result.push(`${whiteSpaceRepeat0}if(res.value.content && Object.keys(res.value.content).length) {`);
+        result.push(`${whiteSpaceRepeat1}const media = randomMedia(res.value.content);`);
+        result.push(`${whiteSpaceRepeat1}const schema = Object.assign({}, {schema: media.value.schema}, definitions);`);
+        result.push(`${whiteSpaceRepeat1}ctx.response.header['Content-Type'] = media.produces;`);
+        result.push(`${whiteSpaceRepeat1}ctx.response.body = jsf.generate(schema).schema;`);
+        result.push(`${whiteSpaceRepeat0}} else {`);
+        result.push(`${whiteSpaceRepeat1}ctx.response.body = res.value.description;`);
+        result.push(`${whiteSpaceRepeat0}}`);
         result.push(`${whiteSpaceRepeat0}ctx.response.status = res.status;`);
         result.push(`${whiteSpaceRepeat0}ctx.response.headers = res.value.headers;`);
     }
@@ -145,7 +151,7 @@ export function generateRoutesString(version: OasVersion, paths: OasPaths): stri
     targetStr.push(`jsf.extend('faker', () => faker);`);
     targetStr.push(`jsf.option({optionalsProbability: 1});` + newLine(0));
     targetStr.push(`if(FINAL_CONFIG.useDict) {`);
-    targetStr.push(`${repeatWhitespace(1)}arrangeDefinitions(definitions.definitions);`)
+    targetStr.push(`${repeatWhitespace(1)}arrangeDefinitions(${ version === OasVersion.V2? 'definitions.definitions' : 'definitions.components.schemas' });`);
     targetStr.push(`}` + newLine(0));
     for (let key in paths) {
         const path: PathItem = paths[key];
